@@ -51,6 +51,11 @@ public class Address {
     @NotNull
     private String state;
 
+    @NotNull
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    private String country;
+
     @ToString.Include
     private String postalCode;
 
@@ -82,6 +87,8 @@ public class Address {
 
         String getState();
 
+        String getCountry();
+
         String getPostalCode();
 
         String getAddressType();
@@ -100,6 +107,8 @@ public class Address {
         void setCity(String city);
 
         void setState(String state);
+
+        void setCountry(String country);
 
         void setPostalCode(String postalCode);
 
