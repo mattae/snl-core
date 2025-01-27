@@ -35,6 +35,8 @@ public class Plugin implements Persistable<UUID> {
 
     private String hash;
 
+    private String signature;
+
     @Override
     public boolean isNew() {
         return id == null;

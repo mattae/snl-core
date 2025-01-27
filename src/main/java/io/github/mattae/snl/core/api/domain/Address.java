@@ -12,7 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "fw_party_addresses")
 @SoftDelete(columnName = "archived")
-@SQLRestriction("archived = false")
 @EntityListeners(AuditEntityListener.class)
 public class Address {
     @Id

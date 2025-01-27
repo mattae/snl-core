@@ -679,4 +679,10 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="202500123-01" author="mattae">
+        <addColumn tableName="fw_plugin">
+            <column name="signature" type="text"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
