@@ -12,7 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "fw_party_addresses")
 @SoftDelete(columnName = "archived")
-@SQLRestriction("archived = false")
 @EntityListeners(AuditEntityListener.class)
 public class Address {
     @Id
@@ -50,6 +48,11 @@ public class Address {
     @ToString.Include
     @NotNull
     private String state;
+
+    @NotNull
+    @EqualsAndHashCode.Include
+    @ToString.Include
+    private String country;
 
     @ToString.Include
     private String postalCode;
@@ -82,6 +85,8 @@ public class Address {
 
         String getState();
 
+        String getCountry();
+
         String getPostalCode();
 
         String getAddressType();
@@ -100,6 +105,8 @@ public class Address {
         void setCity(String city);
 
         void setState(String state);
+
+        void setCountry(String country);
 
         void setPostalCode(String postalCode);
 

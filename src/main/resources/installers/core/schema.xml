@@ -669,4 +669,20 @@
 
         <addUniqueConstraint tableName="fw_preference" columnNames="subject, category"/>
     </changeSet>
+
+    <changeSet id="20241224-1" author="mattae">
+        <modifyDataType tableName="fw_party_addresses" columnName="state" newDataType="varchar(64)"/>
+
+        <addColumn tableName="fw_party_addresses">
+            <column name="country" type="varchar(2)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="202500123-01" author="mattae">
+        <addColumn tableName="fw_plugin">
+            <column name="signature" type="text"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -106,6 +106,8 @@ public class Configuration {
 
         private String system;
 
+        private String name;
+
         private List<DataOption> options;
 
         public enum Type {
