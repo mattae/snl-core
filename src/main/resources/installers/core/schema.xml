@@ -685,4 +685,22 @@
             <column name="signature" type="text"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="20250220-01" author="mattae">
+        <addPrimaryKey tableName="fw_party_addresses" columnNames="id"/>
+        <addPrimaryKey tableName="fw_party_identifiers" columnNames="id"/>
+    </changeSet>
+
+    <changeSet id="20250220-02" author="mattae">
+        <sql>update fw_party_addresses set archived = false where archived = null</sql>
+        <sql>update fw_party_identifiers set archived = false where archived = null</sql>
+
+        <addDefaultValue tableName="fw_party_addresses" columnName="archived" defaultValueComputed="false"/>
+        <addDefaultValue tableName="fw_party_identifiers" columnName="archived" defaultValueComputed="false"/>
+    </changeSet>
+
+    <changeSet id="20250220-03" author="mattae">
+        <addNotNullConstraint tableName="fw_party_identifiers" columnName="archived"/>
+        <addNotNullConstraint tableName="fw_party_addresses" columnName="archived"/>
+    </changeSet>
 </databaseChangeLog>

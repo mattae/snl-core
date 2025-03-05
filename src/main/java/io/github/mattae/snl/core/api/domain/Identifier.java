@@ -4,13 +4,16 @@ import com.blazebit.persistence.view.CreatableEntityView;
 import com.blazebit.persistence.view.EntityView;
 import com.blazebit.persistence.view.IdMapping;
 import com.blazebit.persistence.view.UpdatableEntityView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.mattae.snl.core.api.id.UUIDV7;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.jdbc.Expectation;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,7 +21,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "fw_party_identifiers")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@SoftDelete(columnName = "archived")
+@SQLDelete(sql = "update fw_party_identifiers set archived = true, lastlast_modified_date = now() where id = ?",
+        verify = Expectation.RowCount.class)
+@SQLRestriction("archived = false")
 @Getter
 @Setter
 public class Identifier {
@@ -44,6 +49,8 @@ public class Identifier {
     private LocalDateTime fromDate;
 
     private LocalDateTime toDate;
+
+    private Boolean archived = false;
 
     @ManyToOne
     @NotNull
@@ -97,8 +104,14 @@ public class Identifier {
 
         void setLastModifiedDate(LocalDateTime date);
 
+        @JsonIgnore
+        Boolean getArchived();
+
+        void setArchived(Boolean archived);
+
         @com.blazebit.persistence.view.PreRemove
         default boolean preRemove() {
+            setArchived(true);
             setLastModifiedDate(LocalDateTime.now());
             return false;
         }
@@ -111,6 +124,7 @@ public class Identifier {
         @com.blazebit.persistence.view.PrePersist
         default void prePersist() {
             setLastModifiedDate(LocalDateTime.now());
+            setArchived(false);
         }
     }
 }

@@ -29,7 +29,7 @@ public class Organisation {
     @UUIDV7
     private UUID id;
 
-    @OneToOne
+    @OneToOne(cascade = jakarta.persistence.CascadeType.ALL)
     private Party party;
 
     private String name;
@@ -118,7 +118,7 @@ public class Organisation {
         void setType(String type);
 
         @AllowUpdatableEntityViews
-        @UpdatableMapping(orphanRemoval = true, cascade = CascadeType.PERSIST)
+        @UpdatableMapping(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.UPDATE, CascadeType.DELETE})
         @NotNull
         Party.PartyView getParty();
 

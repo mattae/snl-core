@@ -11,20 +11,26 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
+import org.hibernate.jdbc.Expectation;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@SoftDelete(columnName = "archived")
+//@SoftDelete(columnName = "archived")
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
 @Table(name = "fw_party")
+@SQLRestriction("archived = false")
+@SQLDelete(sql = "update fw_party set archived = true, lastlast_modified_date = now() where id = ?",
+        verify = Expectation.RowCount.class)
 public class Party {
     @Id
     @UUIDV7
@@ -66,17 +72,17 @@ public class Party {
     public interface PartyView extends Party.View {
         void setType(String type);
 
-        @UpdatableMapping(cascade = {com.blazebit.persistence.view.CascadeType.UPDATE, com.blazebit.persistence.view.CascadeType.PERSIST, com.blazebit.persistence.view.CascadeType.DELETE})
+        //@UpdatableMapping(cascade = {com.blazebit.persistence.view.CascadeType.UPDATE, com.blazebit.persistence.view.CascadeType.PERSIST, com.blazebit.persistence.view.CascadeType.DELETE})
         @MappingInverse(removeStrategy = InverseRemoveStrategy.REMOVE)
-        Set<Address.AddressView> getAddresses();
+        List<Address.AddressView> getAddresses();
 
-        void setAddresses(Set<Address.AddressView> addresses);
+        void setAddresses(List<Address.AddressView> addresses);
 
-        @UpdatableMapping(cascade = {com.blazebit.persistence.view.CascadeType.UPDATE, com.blazebit.persistence.view.CascadeType.PERSIST, com.blazebit.persistence.view.CascadeType.DELETE})
+        //@UpdatableMapping(cascade = {com.blazebit.persistence.view.CascadeType.UPDATE, com.blazebit.persistence.view.CascadeType.PERSIST, com.blazebit.persistence.view.CascadeType.DELETE})
         @MappingInverse(removeStrategy = InverseRemoveStrategy.REMOVE)
-        Set<Identifier.IdentifierView> getIdentifiers();
+        List<Identifier.IdentifierView> getIdentifiers();
 
-        void setIdentifiers(Set<Identifier.IdentifierView> identifiers);
+        void setIdentifiers(List<Identifier.IdentifierView> identifiers);
 
 
         LocalDateTime getLastModifiedDate();

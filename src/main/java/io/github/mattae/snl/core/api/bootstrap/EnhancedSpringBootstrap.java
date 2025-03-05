@@ -1,5 +1,6 @@
 package io.github.mattae.snl.core.api.bootstrap;
 
+import com.blazebit.persistence.integration.jackson.EntityViewIdValueAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.scalars.ExtendedScalars;
 import io.github.mattae.snl.core.api.services.*;
@@ -76,6 +77,7 @@ public class EnhancedSpringBootstrap extends SpringBootstrap {
         AnnotationConfigApplicationContext applicationContext =
                 (AnnotationConfigApplicationContext) super.createApplicationContext();
 
+        importBeanFromMainContext(applicationContext, EntityViewIdValueAccessor.class);
         importBeanFromMainContext(applicationContext, RouterFunctionMapping.class);
         importBeanFromMainContext(applicationContext, HttpSecurity.class);
         importBeanFromMainContext(applicationContext, PluginManager.class);
@@ -88,7 +90,6 @@ public class EnhancedSpringBootstrap extends SpringBootstrap {
         importBeanFromMainContext(applicationContext, TranslationService.class);
         importBeanFromMainContext(applicationContext, ValueSetService.class);
         importBeanFromMainContext(applicationContext, DataSource.class);
-        importBeanFromMainContext(applicationContext, ObjectMapper.class);
         importBeanFromMainContext(applicationContext, ExceptionTranslator.class);
         importBeanFromMainContext(applicationContext, ExtensionService.class);
         importBeanFromMainContext(applicationContext, PreferenceService.class);

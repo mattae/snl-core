@@ -2,14 +2,17 @@ package io.github.mattae.snl.core.api.bootstrap;
 
 import com.blazebit.persistence.Criteria;
 import com.blazebit.persistence.CriteriaBuilderFactory;
+import com.blazebit.persistence.integration.jackson.EntityViewIdValueAccessor;
 import com.blazebit.persistence.integration.view.spring.impl.AbstractEntityViewConfigurationSource;
 import com.blazebit.persistence.integration.view.spring.impl.SpringTransactionSupport;
 import com.blazebit.persistence.spi.CriteriaBuilderConfiguration;
+import com.blazebit.persistence.spring.data.webmvc.impl.json.EntityViewAwareMappingJackson2HttpMessageConverter;
 import com.blazebit.persistence.view.ConfigurationProperties;
 import com.blazebit.persistence.view.EntityView;
 import com.blazebit.persistence.view.EntityViewManager;
 import com.blazebit.persistence.view.EntityViews;
 import com.blazebit.persistence.view.spi.EntityViewConfiguration;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.mattae.snl.core.api.config.AuditViewListenersConfiguration;
 import io.github.mattae.snl.core.api.domain.CoreDomain;
 import jakarta.persistence.EntityManagerFactory;
@@ -17,14 +20,18 @@ import org.laxture.sbp.SpringBootPlugin;
 import org.laxture.sbp.spring.boot.IPluginConfigurer;
 import org.laxture.sbp.spring.boot.PluginPersistenceManagedTypes;
 import org.laxture.sbp.spring.boot.SpringBootstrap;
+import org.laxture.spring.util.ApplicationContextProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 class BlazePersistenceConfigurer implements IPluginConfigurer {
@@ -44,6 +51,10 @@ class BlazePersistenceConfigurer implements IPluginConfigurer {
 
         pluginApplicationContext.registerBean("criteriaBuilderFactory", CriteriaBuilderFactory.class,
                 () -> createCriteriaBuilderFactory(bootstrap));
+
+        GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+        beanDefinition.setBeanClass(PluginEntityViewAwareMappingJackson2HttpMessageConverter.class);
+        pluginApplicationContext.registerBeanDefinition("entityViewAwareMappingJackson2HttpMessageConverter", beanDefinition);
     }
 
     @Override
@@ -59,6 +70,7 @@ class BlazePersistenceConfigurer implements IPluginConfigurer {
     }
 
     private EntityViewConfiguration getEntityViewConfiguration(SpringBootstrap bootstrap, ApplicationContext applicationContext) {
+        Thread.currentThread().setContextClassLoader(applicationContext.getClassLoader());
         EntityViewConfiguration configuration = EntityViews.createDefaultConfiguration();
         configuration.setTransactionSupport(new SpringTransactionSupport(
                 bootstrap.getMainApplicationContext().getBean(PlatformTransactionManager.class)));
@@ -126,5 +138,24 @@ class BlazePersistenceConfigurer implements IPluginConfigurer {
         entityViewConfiguration.setTypeTestValue(UUID.class, UUID.randomUUID());
         entityViewConfiguration.addEntityViewListener(AuditViewListenersConfiguration.class);
         return entityViewConfiguration.createEntityViewManager(cbf);
+    }
+
+
+    static class PluginEntityViewAwareMappingJackson2HttpMessageConverter extends EntityViewAwareMappingJackson2HttpMessageConverter {
+        private final SpringBootPlugin plugin;
+
+        public PluginEntityViewAwareMappingJackson2HttpMessageConverter(EntityViewManager entityViewManager,
+                                                                        EntityViewIdValueAccessor entityViewIdValueAccessor,
+                                                                        ObjectMapper objectMapper,
+                                                                        SpringBootPlugin plugin) {
+            super(entityViewManager, entityViewIdValueAccessor, objectMapper);
+            this.plugin = plugin;
+        }
+
+        @Override
+        public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+            setObjectMapper(ApplicationContextProvider.getApplicationContext(plugin.getWrapper().getPluginClassLoader()).getBean(ObjectMapper.class));
+            return contextClass != null && contextClass.getClassLoader().equals(plugin.getWrapper().getPluginClassLoader());
+        }
     }
 }
